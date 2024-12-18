@@ -10,3 +10,4 @@
 # 下載巴哈姆特文章內容
 1. 需下載 wkhtmltopdf
 2. 執行指令：`python aritcle_crawler.py`
+3. 預設保留 html 檔案

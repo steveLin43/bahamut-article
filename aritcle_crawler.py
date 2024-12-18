@@ -55,19 +55,24 @@ def get_baha_head(soup:BeautifulSoup) -> None:
     try:
         baha_head = soup.head
         str_list.append(str(baha_head))
-        baha_bar = soup.body.find('div')
-        str_list.append(str(baha_bar))
     except Exception as e:
         print(e)
 
 # 抓湯裡面各樓內容並暫時儲存
 def get_content_by_page(soup:BeautifulSoup) -> None:
     # todo: 可以用 while + try catch + sleep 進行自動重試，但由於目前是直接寫入檔案因此須改結構
+    # todo: 圖片目前沒有顯示
     try:
+        """
+        # 此方法會省略script內容，需要額外拉出來
         content = soup.find_all('div', {'class': 'c-section__main c-post'})
         for item in content:
             # todo: 加入一些條件，將內容調整得更美觀
             str_list.append(str(item))
+        """
+        # 暫時先全部取
+        baha_content = soup.body
+        str_list.append(str(baha_content))
 
     except Exception as e:
         print(e)
@@ -84,6 +89,7 @@ def create_dir(directory_name:str = '') -> None:
 
 # 主程式第二部分: 將文章內容儲存html檔案
 # todo:留言未展開
+# todo:轉為 PDF 檔時常因時間不足而未讀取完CSS，ProtocolUnknownError
 def get_article_content() -> None:
     total_floors_num = get_last_floor()
     pages = (total_floors_num // floor_num_per_page) + 1
@@ -101,14 +107,15 @@ def get_article_content() -> None:
                 file.write(result)
             str_list.clear()
             
-            # 每五頁存成 pdf，避免檔案過大導致失敗
+            # 每頁都存成 pdf，避免檔案過大導致失敗
             # todo:自訂檔案名稱
-            if (page_number % 5) == 0 :
+            if (page_number % 1) == 0 :
                 save_pdf(f'gen/testpdf{page_number}.pdf')
-                os.remove(temp_file_path)
+                #os.remove(temp_file_path)
+                break
 
         save_pdf(f'gen/testpdf{page_number}.pdf')
-        os.remove(temp_file_path)
+        #os.remove(temp_file_path)
         str_list.clear()
 
     except Exception as e:
@@ -119,10 +126,10 @@ def get_article_content() -> None:
 def save_pdf(filename = 'gen/testpdf.pdf') -> None: # todo: file_name 為 pdf文件名，要換掉
     options = {
         'page-size': 'Letter',
-        'margin-top': '0.75in',
-        'margin-right': '0.75in',
-        'margin-bottom': '0.75in',
-        'margin-left': '0.75in',
+        'margin-top': '0.2in',
+        'margin-right': '0.3in',
+        'margin-bottom': '0.1in',
+        'margin-left': '0.3in',
         'encoding': "UTF-8",
         'custom-header': [
             ('Accept-Encoding', 'gzip')
@@ -132,6 +139,9 @@ def save_pdf(filename = 'gen/testpdf.pdf') -> None: # todo: file_name 為 pdf文
             ('cookie-name2', 'cookie-value2'),
         ],
         'outline-depth': 10,
+        'no-stop-slow-scripts': '',       # 等待 script 執行完成
+        'load-error-handling': 'skip',  # 資源加載處理方式
+        'javascript-delay': 10*60 * 1000,  # 等待秒數
     }
 
     pdfkit.from_file(temp_file_path, filename, options=options)
@@ -141,6 +151,7 @@ def merge_pdf() -> None:
     #todo
 
 if __name__ == '__main__':
+    # todo: 用 sys.argv[n] 將輸入參數化
     resbsn = set_bsn(838)
     ressnA = set_snA(6824)
     try:
