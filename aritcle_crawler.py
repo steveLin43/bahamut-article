@@ -1,16 +1,15 @@
 import requests
 import pdfkit
 import os
+import crawler_detail
 from bs4 import BeautifulSoup
 
 bsn:int = 0
 snA:int = 0
 baha_web_url:str = 'https://forum.gamer.com.tw/C.php'
 general_headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'}
-baha_head = ''
 floor_num_per_page:int = 20 # 巴哈每頁20樓
 dir_name:str = os.path.join(os.path.dirname(__file__), 'gen') # 檔案儲存位置
-str_list:list = []
 temp_file_path = os.path.join(dir_name, 'test.html')
 
 
@@ -32,7 +31,7 @@ def set_snA(num = None) -> bool:
 
 # 計算該篇文章最大樓層數
 def get_last_floor() -> int:
-    url = f'https://forum.gamer.com.tw/C.php?bsn={bsn}&snA={snA}&last=1#down'
+    url = f'{baha_web_url}?bsn={bsn}&snA={snA}&last=1#down'
     soup = BeautifulSoup(requests.get(url, headers = general_headers).text, 'html.parser')
     floors = soup.find_all('a', {'class': 'floor'})
 
@@ -49,34 +48,6 @@ def get_request_content(page:int = 1) -> BeautifulSoup:
     url = f'{baha_web_url}?bsn={bsn}&snA={snA}&page={page}'
     return BeautifulSoup(requests.get(url, headers = general_headers).text, 'html.parser')
 
-#抓取巴哈標頭
-def get_baha_head(soup:BeautifulSoup) -> None:
-    global baha_head, str_list
-    try:
-        baha_head = soup.head
-        str_list.append(str(baha_head))
-    except Exception as e:
-        print(e)
-
-# 抓湯裡面各樓內容並暫時儲存
-def get_content_by_page(soup:BeautifulSoup) -> None:
-    # todo: 可以用 while + try catch + sleep 進行自動重試，但由於目前是直接寫入檔案因此須改結構
-    # todo: 圖片目前沒有顯示
-    try:
-        """
-        # 此方法會省略script內容，需要額外拉出來
-        content = soup.find_all('div', {'class': 'c-section__main c-post'})
-        for item in content:
-            # todo: 加入一些條件，將內容調整得更美觀
-            str_list.append(str(item))
-        """
-        # 暫時先全部取
-        baha_content = soup.body
-        str_list.append(str(baha_content))
-
-    except Exception as e:
-        print(e)
-
 # 主程式第一部分: 創建儲存資料夾
 def create_dir(directory_name:str = '') -> None:
     try:
@@ -91,6 +62,7 @@ def create_dir(directory_name:str = '') -> None:
 # todo:留言未展開
 # todo:轉為 PDF 檔時常因時間不足而未讀取完CSS，ProtocolUnknownError
 def get_article_content() -> None:
+    str_list:list = []
     total_floors_num = get_last_floor()
     pages = (total_floors_num // floor_num_per_page) + 1
     page_number = 0
@@ -98,9 +70,11 @@ def get_article_content() -> None:
         for i in range(pages):
             page_number += 1
             # todo: 判斷標頭只取一次或是每次都取
+            # todo: 可以用 while + try catch + sleep 進行自動重試，但由於目前是直接寫入檔案因此須改結構
             page_soup = get_request_content(page_number)
-            get_baha_head(page_soup)
-            get_content_by_page(page_soup)
+            article_title = crawler_detail.get_baha_title(page_soup)
+            str_list.append(crawler_detail.get_baha_head(page_soup))
+            str_list.append(crawler_detail.get_content_by_page(page_soup))
             # 寫入檔案
             result = "\n".join(str_list)
             with open(temp_file_path, 'a', encoding='utf-8') as file:
@@ -108,13 +82,12 @@ def get_article_content() -> None:
             str_list.clear()
             
             # 每頁都存成 pdf，避免檔案過大導致失敗
-            # todo:自訂檔案名稱
             if (page_number % 1) == 0 :
-                save_pdf(f'gen/testpdf{page_number}.pdf')
+                save_pdf(f'gen/{article_title} - 第{page_number}頁.pdf')
                 #os.remove(temp_file_path)
                 break
 
-        save_pdf(f'gen/testpdf{page_number}.pdf')
+        save_pdf(f'gen/{article_title} - 第{page_number}頁.pdf')
         #os.remove(temp_file_path)
         str_list.clear()
 
