@@ -29,14 +29,14 @@ def get_baha_head(soup:BeautifulSoup) -> str:
         for item in link_list:
             result_list.append(str(link_tags[item]))
 
-        # 較重要的內容: bar(1 4 6 9 10 32 53)、抓取人物大頭貼(37)、樓層移動(48)、右側長條廣告(69-71)
+        # 較重要的內容: bar、抓取人物大頭貼、樓層移動、右側長條廣告，細節請見文件
         script_tags = baha_head.find_all('script')
-        script_list = [1, 4, 6, 9, 10, 32, 37, 48, 53]
+        script_list = [1, 4, 6, 7, 8, 9, 10, 12, 19, 25, 26, 32, 37, 38, 39, 48, 49, 50, 52, 60, 64]
         for item in script_list:
             result_list.append(str(script_tags[item]))
 
         result_list.append(str(baha_head.style))
-        result_list.append('</head>')
+        result_list.append('</meta></meta></meta></head>')
 
         return "\n".join(result_list)
     except Exception as e:
@@ -44,20 +44,88 @@ def get_baha_head(soup:BeautifulSoup) -> str:
         raise
 
 # 抓湯裡面的各樓內容
+# todo: 更多留言，需要打 api 取得，/ajax/moreCommend.php?bsn={}&snB={}&returnHtml=1&next_snC=0，可以直接抓 comment_content\"\u003E 就會是留言內容
 def get_content_by_page(soup:BeautifulSoup) -> str:
-    # todo: 圖片目前沒有顯示
+    result_list:list = ['<body>']
     try:
-        """
-        # 此方法會省略script內容，需要額外拉出來
-        content = soup.find_all('div', {'class': 'c-section__main c-post'})
-        for item in content:
-            # todo: 加入一些條件，將內容調整得更美觀
-            str_list.append(str(item))
-        """
-        # 暫時先全部取
-        baha_content = soup.body
-        return str(baha_content)
+        baha_body = soup.body
 
+        # 框架樣式
+        result_list.append(handle_content_bar(baha_body))
+        result_list.append(str(baha_body.find_all('script')[1]))
+        result_list.append(str(baha_body.find('div', {'class': 'BH-menu'})))
+        result_list.append('<div class="bh-banner" id="bh-banner"></div>')
+        result_list.append('<div class="" id="BH-wrapper"><div id="BH-master"><div class="forum-ad_top"></div>')
+        result_list.append('<!-- 框架樣式結束 -->')
+
+        # 中心內容
+        content = baha_body.find_all('section', {'class': 'c-section'})
+        for item in content[1:-3]:
+            # 第一個元素：頁碼；最後兩個元素：留言、延伸閱讀
+            result_list.append(str(item))
+        result_list.append('</div>') # BH-master
+        result_list.append('<!-- 中心內容結束 -->')
+
+        # 右側內容
+        result_list.append(handle_content_right(baha_body))
+        result_list.append('<!-- 右側內容結束 -->')
+
+        # 最底下 footer
+        #result_list.append(str(baha_body.find('br', {'class': 'clearfloat'})))
+
+        result_list.append('</div></body>')
+
+        return "\n".join(result_list)
     except Exception as e:
         print(f'get_content_by_page 出現錯誤: {e}')
+        raise
+
+
+# 減少內文量，如果嫌麻煩或是出錯，可以直接 soup.body.find('div', {'class': 'TOP-bh'})
+def handle_content_bar(soup_body:BeautifulSoup) -> str:
+    content_bar_list:list = ['<div class="TOP-bh"><div class="TOP-data" id="BH-top-data">']
+    content_bar_list.append('<div class="TOP-my"></div>')
+    content_bar_list.append('<div class="TOP-msg" id="topBarMsg_more" style="display:none"></div>')
+    content_bar_list.append('<script src="https://i2.bahamut.com.tw/js/forum_search.js" type="text/javascript"></script>')
+
+    try:
+        content_bar_list.append(str(soup_body.find('a', {'class': 'logo'})))
+        content_bar_list.append(str(soup_body.find('div', {'class': 'header__search gcse-bar mobilehide'})))
+        content_bar_list.append('</div></div>')
+
+        return "\n".join(content_bar_list)
+
+    except Exception as e:
+        print(f'handle_content_bar 出現錯誤: {e}')
+        raise
+
+# 減少內文量，如果嫌麻煩或是出錯，可以直接忽略
+def handle_content_right(soup_body:BeautifulSoup) -> str:
+    content_right_list:list = ['<div id="BH-slave">']
+    try:
+        # 板務人員
+        content_right_list.append(str(soup_body.find('div', {'class': 'BH-rbox FM-rbox14'})))
+
+        # 內文超連結 flySalve
+        content_right_list.append(str(soup_body.style))
+        content_right_list.append(str(soup_body.find_all('script', type='text/javascript')[-1]))
+
+        # 向下滑動時的bar
+        content_right_list.append('<div id="postInfo" style="display:none;"></div>')
+        content_right_list.append('<template id="optionMenu"></template>')
+        content_right_list.append('<template id="manageMenu"></template>')
+        content_right_list.append('<div id="replyMenu" style="display:none;"></div>')
+        content_right_list.append(str(soup_body.find('div', {'class': 'c-fixed--header'})))
+        content_right_list.append('<script id="insertVideoTemplate" type="text/template"></script>')
+
+        # 右下小功能
+        content_right_list.append('<link href="https://i2.bahamut.com.tw/css/baha_quicktool.css" rel="stylesheet"/>')
+        content_right_list.append(str(soup_body.find('div', {'class': 'baha_quicktool no-bottombar'})))
+        content_right_list.append('<script src="https://i2.bahamut.com.tw/js/quicktool.js"></script>')
+
+        content_right_list.append('</div>')
+        return "\n".join(content_right_list)
+
+    except Exception as e:
+        print(f'handle_content_bar 出現錯誤: {e}')
         raise

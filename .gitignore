@@ -1,2 +1,5 @@
 # temp files
 /gen/*
+
+# cache
+/__pycache__/*
