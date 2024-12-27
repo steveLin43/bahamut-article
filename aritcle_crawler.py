@@ -1,35 +1,48 @@
-import requests
-import pdfkit
-import os
 import crawler_detail
+import os
+import pdfkit
+import requests
+import sys
 from bs4 import BeautifulSoup
 
-bsn:int = 0
-snA:int = 0
+# 常數區
 baha_web_url:str = 'https://forum.gamer.com.tw/C.php'
 general_headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'}
 floor_num_per_page:int = 20 # 巴哈每頁20樓
 dir_name:str = os.path.join(os.path.dirname(__file__), 'gen') # 檔案儲存位置
 
+# 運作變數區
 pages:int = 1 # 此篇文章共有幾頁
 file_path_html = os.path.join(dir_name, 'test.html')
 file_path_pdf = os.path.join(dir_name, 'test.pdf')
 
-def set_bsn(num = None) -> bool:
-    global bsn
-    if(num == None or (not isinstance(num, int))):
-        return False
-    else:
-        bsn = int(num)
-    return True
+# 輸入參數區
+bsn:int = 0
+snA:int = 0
+delete_html:bool = False
 
-def set_snA(num = None) -> bool:
-    global snA
-    if(num == None or (not isinstance(num, int))):
-        return False
+def set_bsn():
+    global bsn
+    if len(sys.argv) <= 1:
+        raise Exception('請填入 bsn 參數')
+    elif not sys.argv[1].isdigit():
+        raise Exception('你難道不知道 bsn 只能填入數字嗎')
     else:
-        snA = int(num)
-    return True
+        bsn = int(sys.argv[1])
+
+def set_snA():
+    global snA
+    if len(sys.argv) <= 2:
+        raise Exception('請填入 snA 參數')
+    elif not sys.argv[2].isdigit():
+        raise Exception('你難道不知道 snA 只能填入數字嗎')
+    else:
+        snA = int(sys.argv[2])
+
+def handle_not_necessary_para():
+    global delete_html
+    if (len(sys.argv) >= 4) and (sys.argv[3] == 1):
+        delete_html = True
 
 def set_file_name(title:str, page:int = 1) -> None:
     global file_path_html, file_path_pdf
@@ -99,11 +112,13 @@ def get_article_content() -> None:
             # 每頁都存成 pdf，避免檔案過大導致失敗
             if (page_number % 1) == 0 :
                 save_pdf(file_path_pdf)
-                #os.remove(file_path_html) # todo:加入參數確認是否要保留
+                if delete_html:
+                    os.remove(file_path_html)
                 break
 
         save_pdf(file_path_pdf)
-        #os.remove(file_path_html)
+        if delete_html:
+            os.remove(file_path_html)
         str_list.clear()
 
     except Exception as e:
@@ -141,15 +156,21 @@ def merge_pdf() -> None:
     #todo
 
 if __name__ == '__main__':
-    # todo: 用 sys.argv[n] 將輸入參數化
-    resbsn = set_bsn(838)
-    ressnA = set_snA(6824)
+    doing = True
+    # 參數順序: bsn、snA、刪除檔案838 6284
     try:
-        if (resbsn and ressnA):
+        set_bsn()
+        set_snA()
+        handle_not_necessary_para()
+    except Exception as e:
+        print('出現錯誤: ' + str(e))
+        doing = False
+
+    # 執行
+    if (doing):
+        try:
             create_dir()
             get_article_content()
             merge_pdf()
-        else:
-            print('輸入參數錯誤')
-    except Exception as e:
-        print('出現錯誤: ' + e)
+        except Exception as e:
+            print('出現錯誤: ' + str(e))
