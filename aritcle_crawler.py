@@ -4,6 +4,7 @@ import pdfkit
 import requests
 import sys
 from bs4 import BeautifulSoup
+from PyPDF2 import PdfReader, PdfWriter
 
 # 常數區
 baha_web_url:str = 'https://forum.gamer.com.tw/C.php'
@@ -15,6 +16,7 @@ dir_name:str = os.path.join(os.path.dirname(__file__), 'gen') # 檔案儲存位�
 pages:int = 1 # 此篇文章共有幾頁
 file_path_html = os.path.join(dir_name, 'test.html')
 file_path_pdf = os.path.join(dir_name, 'test.pdf')
+file_path_pdf_final = os.path.join(dir_name, 'test_final.pdf')
 
 # 輸入參數區
 bsn:int = 0
@@ -46,13 +48,14 @@ def handle_not_necessary_para():
 
 # 處理每份文件名稱
 def set_file_name(title:str, page:int = 1) -> None:
-    global file_path_html, file_path_pdf
+    global file_path_html, file_path_pdf, file_path_pdf_final
     if(pages == 1):
         file_path_html = os.path.join(dir_name, f'{title}.html')
         file_path_pdf = os.path.join(dir_name, f'{title}.pdf')
     else:
         file_path_html = os.path.join(dir_name, f'{title} - 第{page}頁.html')
         file_path_pdf = os.path.join(dir_name, f'{title} - 第{page}頁.pdf')
+        file_path_pdf_final = os.path.join(dir_name, f'{title}.pdf')
 
 # 計算該篇文章最大樓層數
 def get_last_floor() -> int:
@@ -87,10 +90,16 @@ def create_dir(directory_name:str = '') -> None:
 def get_article_content() -> None:
     global pages
     str_list:list = []
+    pdf_list:list = []
     total_floors_num = get_last_floor()
     pages = (total_floors_num // floor_num_per_page) + 1
     page_number = 0
     page_number_each = 1 # 讓程式每幾頁儲存一次
+    
+    if total_floors_num == 0:
+        print('網址或是網路錯誤')
+        return
+    
     try:
         for i in range(pages):
             page_number += 1
@@ -111,17 +120,22 @@ def get_article_content() -> None:
             str_list = str_list[:1]
             
             # 分頁儲存避免檔案過大導致失敗
-            if (page_number % page_number_each) == 0 :
+            if (page_number % page_number_each) == 0:
                 save_pdf(file_path_pdf)
+                pdf_list.append(file_path_pdf)
                 if delete_html:
                     os.remove(file_path_html)
-                break
+                break #todo:測試用
 
         if (pages % page_number_each) != 0 :
             save_pdf(file_path_pdf)
+            pdf_list.append(file_path_pdf)
             if delete_html:
                 os.remove(file_path_html)
         str_list.clear()
+
+        if len(file_path_pdf) > 1:
+            merge_pdf(pdf_list, file_path_pdf_final)
 
     except Exception as e:
         print(f'在處理第{page_number}頁時出現錯誤')
@@ -153,9 +167,23 @@ def save_pdf(pdfFileName:str) -> None:
 
     pdfkit.from_file(file_path_html, pdfFileName, options=options)
 
-def merge_pdf() -> None:
-    a=1
-    #todo
+def merge_pdf(pdf_list:list, output_name:str) -> None:
+    pagenum = 0
+    pdf_output = PdfWriter()
+
+    for pdf in pdf_list:
+        pdf_input = PdfReader(open(pdf, 'rb'))
+
+        page_count = len(pdf_input.pages)
+        for i in range(page_count):
+            pdf_output.add_page(pdf_input.pages[i])
+        pagenum += page_count
+
+    # 合併並刪除子文件
+    pdf_output.write(open(output_name, 'wb'))
+    # 删除所有PDF子文件
+    for item in pdf_list:
+        os.remove(item)
 
 if __name__ == '__main__':
     doing = True
@@ -173,6 +201,5 @@ if __name__ == '__main__':
         try:
             create_dir()
             get_article_content()
-            merge_pdf()
         except Exception as e:
             print('出現錯誤: ' + str(e))
