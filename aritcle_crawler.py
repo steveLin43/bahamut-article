@@ -22,6 +22,7 @@ file_path_pdf_final = os.path.join(dir_name, 'test_final.pdf')
 bsn:int = 0
 snA:int = 0
 delete_html:bool = False
+delete_pdf:bool = False
 
 def set_bsn():
     global bsn
@@ -42,9 +43,12 @@ def set_snA():
         snA = int(sys.argv[2])
 
 def handle_not_necessary_para():
-    global delete_html
-    if (len(sys.argv) >= 4) and (sys.argv[3] == 1):
-        delete_html = True
+    global delete_html, delete_pdf
+    if (len(sys.argv) >= 4):
+        if 'd' in sys.argv[3:]:
+            delete_html = True
+        if 'm' in sys.argv[3:]:
+            delete_pdf = True
 
 # 處理每份文件名稱
 def set_file_name(title:str, page:int = 1) -> None:
@@ -179,15 +183,16 @@ def merge_pdf(pdf_list:list, output_name:str) -> None:
             pdf_output.add_page(pdf_input.pages[i])
         pagenum += page_count
 
-    # 合併並刪除子文件
+    # 合併
     pdf_output.write(open(output_name, 'wb'))
     # 删除所有PDF子文件
-    for item in pdf_list:
-        os.remove(item)
+    if delete_pdf:
+        for item in pdf_list:
+            os.remove(item)
 
 if __name__ == '__main__':
     doing = True
-    # 參數順序: bsn、snA、是否刪除檔案
+    # 參數順序: bsn、snA、是否刪除html檔案(d)、是否刪除PDF子文件(m)
     try:
         set_bsn()
         set_snA()

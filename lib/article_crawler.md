@@ -1,9 +1,11 @@
 # 下載巴哈姆特文章內容
 1. 需下載 wkhtmltopdf
-2. 執行指令：`python aritcle_crawler.py 討論版編號 文章編號 刪除檔案`
+2. 執行指令：`python aritcle_crawler.py 討論版編號 文章編號 刪除html檔案 刪除PDF子文件`
+3. 編號以後的參數不必按照順序
 
 # 變數解釋
-刪除檔案：選擇是否刪除產生的 html 檔案，保留為0、刪除為1。預設保留 html 檔案。
+刪除html檔案(d)：選擇是否刪除產生的 html 檔案，預設保留，如果要刪除則輸入d。
+刪除PDF子文件(m)：選擇是否刪除產生的 PDF 子檔案，預設保留，如果要刪除則輸入m。
 
 # 抓取巴哈標頭的 script 細節
 ## bar
