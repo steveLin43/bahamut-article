@@ -1,3 +1,6 @@
+import os
+import requests
+import time
 from bs4 import BeautifulSoup
 
 # 抓湯裡面的巴哈標題
@@ -80,7 +83,6 @@ def get_content_by_page(soup:BeautifulSoup) -> str:
         print(f'get_content_by_page 出現錯誤: {e}')
         raise
 
-
 # 減少內文量，如果嫌麻煩或是出錯，可以直接 soup.body.find('div', {'class': 'TOP-bh'})
 def handle_content_bar(soup_body:BeautifulSoup) -> str:
     content_bar_list:list = ['<div class="TOP-bh"><div class="TOP-data" id="BH-top-data">']
@@ -129,3 +131,42 @@ def handle_content_right(soup_body:BeautifulSoup) -> str:
     except Exception as e:
         print(f'handle_content_bar 出現錯誤: {e}')
         raise
+
+# 抓取討論串中各樓的所有圖片
+def download_pictures_from_soup(soup:BeautifulSoup, path:str, pic_title:str, number:int) -> int:
+    content_list = soup.body.find_all('div', {'class': 'c-article__content'})
+    pictures_list = []
+
+    # 針對每則回覆進行提取
+    for content in content_list:
+        pictures_list += content.find_all('img', {'class': 'lazyload'})
+
+    # 提取連結並下載
+    for pic in pictures_list:
+        try:
+            pic_url = pic.get('data-src')
+
+            if not pic_url:
+                print(f'{pic_url} 無效的圖片URL')
+                continue
+
+            file_extension = pic_url.split('.')[-1].lower() # 統一轉為小寫
+            if file_extension not in ['jpg', 'jpeg', 'png', 'gif']:
+                print(f'{pic_url}：不支持的圖片格式 {file_extension}')
+                continue
+
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+            response = requests.get(pic_url, headers=headers, timeout=10)
+            response.raise_for_status() # 確保有正常取得圖片
+
+            pic_name = os.path.join(path, f'{pic_title}-{number:02}.{file_extension}')
+            with open(pic_name, "wb") as file:
+                file.write(response.content)
+
+            number += 1
+            time.sleep(1)
+
+        except Exception as e:
+            print(f'{pic} 出現問題：{e}')
+            continue
+    return number

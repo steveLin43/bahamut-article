@@ -23,6 +23,9 @@ bsn:int = 0
 snA:int = 0
 delete_html:bool = False
 delete_pdf:bool = False
+no_picture:bool = False
+
+#todo:運作log紀錄
 
 def set_bsn():
     global bsn
@@ -43,12 +46,14 @@ def set_snA():
         snA = int(sys.argv[2])
 
 def handle_not_necessary_para():
-    global delete_html, delete_pdf
+    global delete_html, delete_pdf, no_picture
     if (len(sys.argv) >= 4):
         if 'd' in sys.argv[3:]:
             delete_html = True
         if 'm' in sys.argv[3:]:
             delete_pdf = True
+        if 'p' in sys.argv[3:]:
+            no_picture = True
 
 # 處理每份文件名稱
 def set_file_name(title:str, page:int = 1) -> None:
@@ -96,9 +101,11 @@ def get_article_content() -> None:
     str_list:list = []
     pdf_list:list = []
     total_floors_num = get_last_floor()
+    article_title:str = ''
     pages = (total_floors_num // floor_num_per_page) + 1
     page_number = 0
     page_number_each = 1 # 讓程式每幾頁儲存一次
+    picture_number = 1
     
     if total_floors_num == 0:
         print('網址或是網路錯誤')
@@ -116,6 +123,8 @@ def get_article_content() -> None:
 
             set_file_name(article_title, page_number)
             str_list.append(crawler_detail.get_content_by_page(page_soup))
+            if no_picture:
+                picture_number = crawler_detail.download_pictures_from_soup(page_soup, dir_name, article_title, picture_number)
 
             # 寫入檔案
             result = "\n".join(str_list)
@@ -192,7 +201,7 @@ def merge_pdf(pdf_list:list, output_name:str) -> None:
 
 if __name__ == '__main__':
     doing = True
-    # 參數順序: bsn、snA、是否刪除html檔案(d)、是否刪除PDF子文件(m)
+    # 參數順序: bsn、snA、是否刪除html檔案(d)、是否刪除PDF子文件(m)、是否不刪除圖片(p)
     try:
         set_bsn()
         set_snA()
