@@ -1,4 +1,5 @@
 import crawler_detail
+import crawler_log
 import os
 import pdfkit
 import requests
@@ -24,8 +25,6 @@ snA:int = 0
 delete_html:bool = False
 delete_pdf:bool = False
 no_picture:bool = False
-
-#todo:運作log紀錄
 
 def set_bsn():
     global bsn
@@ -73,7 +72,7 @@ def get_last_floor() -> int:
     floors = soup.find_all('a', {'class': 'floor'})
 
     if not floors:
-        print("未找到樓層資訊")
+        crawler_log.expected_log(20)
         return 0
 
     last_floor_text = floors[-1].text.strip()
@@ -93,7 +92,9 @@ def create_dir(directory_name:str = '') -> None:
         if not os.path.exists(directory_name):
             os.makedirs(directory_name)
     except Exception as e:
-        print(e)
+        print('創建儲存資料夾時失敗')
+        crawler_log.unexpected_error()
+        raise
 
 # 主程式第二部分: 將文章內容儲存html檔案
 def get_article_content() -> None:
@@ -108,7 +109,8 @@ def get_article_content() -> None:
     picture_number = 1
     
     if total_floors_num == 0:
-        print('網址或是網路錯誤')
+        print('無符合資料')
+        crawler_log.expected_log(22)
         return
     
     try:
@@ -151,8 +153,7 @@ def get_article_content() -> None:
             merge_pdf(pdf_list, file_path_pdf_final)
 
     except Exception as e:
-        print(f'在處理第{page_number}頁時出現錯誤')
-        print(e)
+        crawler_log.expected_log(41, f'第{page_number}頁。')
 
 # 保存成 pdf
 # todo: 圖片目前沒有顯示，ProtocolUnknownError
@@ -203,11 +204,13 @@ if __name__ == '__main__':
     doing = True
     # 參數順序: bsn、snA、是否刪除html檔案(d)、是否刪除PDF子文件(m)、是否不刪除圖片(p)
     try:
+        crawler_log.expected_log(10, str(sys.argv))
         set_bsn()
         set_snA()
         handle_not_necessary_para()
     except Exception as e:
-        print('出現錯誤: ' + str(e))
+        crawler_log.expected_log(40)
+        print('參數錯誤導致失敗')
         doing = False
 
     # 執行
@@ -216,4 +219,4 @@ if __name__ == '__main__':
             create_dir()
             get_article_content()
         except Exception as e:
-            print('出現錯誤: ' + str(e))
+            print('執行出錯導致失敗')

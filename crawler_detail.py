@@ -1,3 +1,4 @@
+import crawler_log
 import os
 import requests
 import time
@@ -9,8 +10,8 @@ def get_baha_title(soup:BeautifulSoup) -> str:
         title = soup.head.title.string
         result = title.split(' @')[0]
         return result
-    except Exception as e:
-        print(f'get_baha_title 出現錯誤: {e}')
+    except Exception:
+        crawler_log.expected_log(42, 'get_baha_title 出錯。')
         raise
 
 # 抓湯裡面的巴哈標頭
@@ -42,8 +43,8 @@ def get_baha_head(soup:BeautifulSoup) -> str:
         result_list.append('</meta></meta></meta></head>')
 
         return "\n".join(result_list)
-    except Exception as e:
-        print(f'get_baha_head 出現錯誤: {e}')
+    except Exception:
+        crawler_log.expected_log(42, 'get_baha_head 出錯。')
         raise
 
 # 抓湯裡面的各樓內容
@@ -79,8 +80,8 @@ def get_content_by_page(soup:BeautifulSoup) -> str:
         result_list.append('</div></body>')
 
         return "\n".join(result_list)
-    except Exception as e:
-        print(f'get_content_by_page 出現錯誤: {e}')
+    except Exception:
+        crawler_log.expected_log(42, 'get_content_by_page 出錯。')
         raise
 
 # 減少內文量，如果嫌麻煩或是出錯，可以直接 soup.body.find('div', {'class': 'TOP-bh'})
@@ -97,8 +98,8 @@ def handle_content_bar(soup_body:BeautifulSoup) -> str:
 
         return "\n".join(content_bar_list)
 
-    except Exception as e:
-        print(f'handle_content_bar 出現錯誤: {e}')
+    except Exception:
+        crawler_log.expected_log(42, 'handle_content_bar 出錯。')
         raise
 
 # 減少內文量，如果嫌麻煩或是出錯，可以直接忽略
@@ -128,14 +129,15 @@ def handle_content_right(soup_body:BeautifulSoup) -> str:
         content_right_list.append('</div>')
         return "\n".join(content_right_list)
 
-    except Exception as e:
-        print(f'handle_content_bar 出現錯誤: {e}')
+    except Exception:
+        crawler_log.expected_log(42, 'handle_content_right 出錯。')
         raise
 
 # 抓取討論串中各樓的所有圖片
 def download_pictures_from_soup(soup:BeautifulSoup, path:str, pic_title:str, number:int) -> int:
     content_list = soup.body.find_all('div', {'class': 'c-article__content'})
     pictures_list = []
+    defective_nums = 0
 
     # 針對每則回覆進行提取
     for content in content_list:
@@ -147,12 +149,14 @@ def download_pictures_from_soup(soup:BeautifulSoup, path:str, pic_title:str, num
             pic_url = pic.get('data-src')
 
             if not pic_url:
-                print(f'{pic_url} 無效的圖片URL')
+                crawler_log.expected_log(43, f'{pic_url} 無效的圖片URL')
+                defective_nums += 1
                 continue
 
             file_extension = pic_url.split('.')[-1].lower() # 統一轉為小寫
             if file_extension not in ['jpg', 'jpeg', 'png', 'gif']:
-                print(f'{pic_url}：不支持的圖片格式 {file_extension}')
+                crawler_log.expected_log(43, f'{pic_url}：不支持的圖片格式 {file_extension}')
+                defective_nums += 1
                 continue
 
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
@@ -167,6 +171,10 @@ def download_pictures_from_soup(soup:BeautifulSoup, path:str, pic_title:str, num
             time.sleep(1)
 
         except Exception as e:
-            print(f'{pic} 出現問題：{e}')
+            crawler_log.unexpected_error()
             continue
+
+    if defective_nums != 0:
+        print('共有{defective_nums}張圖片沒有成功下載，請記得確認。')
+
     return number
