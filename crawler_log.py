@@ -26,6 +26,7 @@ log_message_map:dict = {
     41: '處理頁面時出現錯誤。',
     42: 'crawler_detail 出現錯誤。',
     43: '處理圖片時出現錯誤。',
+    44: '打 API 時非正常回應。',
     # critical 50
 }
 

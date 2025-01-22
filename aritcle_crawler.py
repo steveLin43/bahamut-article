@@ -202,7 +202,7 @@ def merge_pdf(pdf_list:list, output_name:str) -> None:
 
 if __name__ == '__main__':
     doing = True
-    # 參數順序: bsn、snA、是否刪除html檔案(d)、是否刪除PDF子文件(m)、是否不刪除圖片(p)
+    # 參數順序: bsn、snA、是否刪除html檔案(d)、是否刪除PDF子文件(m)、是否不下載圖片(p)
     try:
         crawler_log.expected_log(10, str(sys.argv))
         set_bsn()
@@ -219,4 +219,5 @@ if __name__ == '__main__':
             create_dir()
             get_article_content()
         except Exception as e:
+            crawler_log.unexpected_error()
             print('執行出錯導致失敗')

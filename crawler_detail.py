@@ -1,4 +1,5 @@
 import crawler_log
+import json
 import os
 import requests
 import time
@@ -48,7 +49,6 @@ def get_baha_head(soup:BeautifulSoup) -> str:
         raise
 
 # 抓湯裡面的各樓內容
-# todo: 更多留言，需要打 api 取得，/ajax/moreCommend.php?bsn={}&snB={}&returnHtml=1&next_snC=0，可以直接抓 comment_content\"\u003E 就會是留言內容
 def get_content_by_page(soup:BeautifulSoup) -> str:
     result_list:list = ['<body>']
     try:
@@ -64,9 +64,12 @@ def get_content_by_page(soup:BeautifulSoup) -> str:
 
         # 中心內容
         content = baha_body.find_all('section', {'class': 'c-section'})
-        for item in content[1:-3]:
-            # 第一個元素：頁碼；最後兩個元素：留言、延伸閱讀
+        for item in content[1:-3]: # 第一個元素：頁碼；最後兩個元素：留言、延伸閱讀
+            hide_comments = item.find_all('a', {'class': 'hide-reply is-hide'})
+            if hide_comments:
+                item = handle_morecomment(item)
             result_list.append(str(item))
+            
         result_list.append('</div>') # BH-master
         result_list.append('<!-- 中心內容結束 -->')
 
@@ -178,3 +181,80 @@ def download_pictures_from_soup(soup:BeautifulSoup, path:str, pic_title:str, num
         print('共有{defective_nums}張圖片沒有成功下載，請記得確認。')
 
     return number
+
+# 取得更多內容的資料
+def get_morecomment_content(bsn:int, snB:int) -> str:
+    ## morecomment html conent (固定變數)=======================================================
+    data_comment = {
+        "bsn": bsn,
+        "snB": snB,
+        "sn": 1  # 變動值
+    }
+    second = '<button class="more tippy-reply-menu" type="button"><i class="material-icons"></i></button>'
+    eighth = '<div class="buttonbar"><button class="gp" onclick="Forum.C.commentGp(this);" title="推一個！" type="button"><i class="material-icons"></i></button><a class="gp-count" data-gp="0" href="javascript:;"></a><button class="bp" onclick="Forum.C.commentBp(this);" title="我要噓…" type="button"><i class="material-icons"></i></button><a class="bp-count" data-bp="0" href="javascript:;"></a>'
+    ## =========================================================================================
+
+    time.sleep(1)
+    url = f'https://forum.gamer.com.tw/ajax/moreCommend.php?bsn={bsn}&snB={snB}'
+    headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36'}
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code != 200:
+        crawler_log.expected_log(44, json.dumps(response.json()))
+        return ''
+    comments = response.json()
+
+    result = []
+    for key, value in comments.items():
+        if key == 'next_snC':
+            continue
+        ## morecomment html conent (變動變數)=======================================================
+        data_comment['sn'] = value['sn']
+        data_comment_str = json.dumps(data_comment)
+        username = value['userid'].lower()
+        
+        # 處理訊息內容
+        value_content = value['content']
+        if (value['content'][0] == '[') and (']' in value['content']) and (':' in value['content']): #回覆對象 ex: [test123:測試321]訊息訊息訊息
+            temp = value['content'].split(']')
+            temp2 = temp[0].split(':')
+            a_tag = f'<a target="_blank" href="https://home.gamer.com.tw/{temp2[0][1:]}">{temp2[1]}</a>'
+            value_content = a_tag + temp[-1]
+
+        if (value['content'][0] == '#') and ('# ' in value['content']) and (':' in value['content']): #回覆樓層 ex: #test123:測試321# 訊息訊息訊息
+            temp = value['content'].split('# ')
+            temp2 = temp[0].split(':')
+            # 超連結沒必要所以單純賦予顏色
+            #a_tag = f'<a href="javascript:Forum.C.openCommentDialog(838, 23194,3392104);">{temp2[1]}</a> ' 
+            a_tag = f'<span style="color: rgb(17, 126, 150)">{temp2[0][1:]}</span> '
+            value_content = a_tag + temp[-1]
+
+        first = f'<div class="c-reply__item" data-comment=\'{data_comment_str}\' id="Commendcontent_{value['sn']}" name="comment_parent"><div>'
+        third = f'<a class="reply-avatar user--sm" href="//home.gamer.com.tw/{username}" target="_blank"><img class="gamercard lazyload" data-gamercard-userid="{value['userid']}" data-src="https://avatar2.bahamut.com.tw/avataruserpic/{username[0]}/{username[1]}/{username}/{username}_s.png"/></a>'
+        forth = f'<div class="reply-content"><a class="reply-content__user" href="//home.gamer.com.tw/{username}" target="_blank">{value['nick']}</a>'
+        fifth = f'<article class="reply-content__article c-article"><span class="comment_content" data-formatted="yes"> {value_content}</span></article>'
+        sixth = f'<div class="reply-content__footer"><div class="edittime" name="comment_floor" style="margin-right:6px;">B{value['floor']}</div>'
+        seventh = f'<div class="edittime" data-tippy-content="留言時間 {value['wtime']}"> {value['wtime']}</div>'
+        nineth = f'<button class="tag" onclick="Forum.C.replyToFloor({value['snB']}, {value['sn']}, {value['floor']});" type="button">回覆</button></div></div></div></div></div>'
+        ## =========================================================================================
+        result_value = first + second + third + forth + fifth + sixth + seventh + eighth + nineth
+        result.append(result_value)
+
+    connect_str = ''
+    result.reverse()
+    front = f'<div id="Commendlist_{snB}">'
+    return front + connect_str.join(result) + '</div>'
+
+def handle_morecomment(soup_content:BeautifulSoup) -> BeautifulSoup:
+    # 尋找替換位置
+    replaced = soup_content.find('div', {'class': 'c-post__footer c-reply'})
+
+    # 產生替換內容
+    new_content = '<div class="c-post__footer c-reply">'
+    div_tag = soup_content.find('div', {'class': 'c-reply__item'})
+    data_comment = div_tag['data-comment']
+    comment_data = json.loads(data_comment)
+    new_content += get_morecomment_content(comment_data['bsn'], comment_data['snB']) + '</div>'
+    
+    replaced.replace_with(BeautifulSoup(new_content, 'html.parser'))
+    return soup_content
