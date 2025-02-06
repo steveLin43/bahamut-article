@@ -130,33 +130,33 @@ def get_article_content() -> None:
 
             # 寫入檔案
             result = "\n".join(str_list)
+            #result = result.replace("https://i2.bahamut.com.tw/css", "../baha_doc/css") # 取得本地檔案
+            #result = result.replace("https://i2.bahamut.com.tw/js", "../baha_doc/js") # 取得本地檔案
             with open(file_path_html, 'a', encoding='utf-8') as file:
                 file.write(result)
             str_list = str_list[:1]
             
             # 分頁儲存避免檔案過大導致失敗
             if (page_number % page_number_each) == 0:
-                save_pdf(file_path_pdf)
+                #save_pdf(file_path_pdf)
                 pdf_list.append(file_path_pdf)
                 if delete_html:
                     os.remove(file_path_html)
-                break #todo:測試用
 
         if (pages % page_number_each) != 0 :
-            save_pdf(file_path_pdf)
+            #save_pdf(file_path_pdf)
             pdf_list.append(file_path_pdf)
             if delete_html:
                 os.remove(file_path_html)
         str_list.clear()
 
-        if len(file_path_pdf) > 1:
-            merge_pdf(pdf_list, file_path_pdf_final)
+        #if len(file_path_pdf) > 1:
+            #merge_pdf(pdf_list, file_path_pdf_final)
 
     except Exception as e:
         crawler_log.expected_log(41, f'第{page_number}頁。')
 
-# 保存成 pdf
-# todo: 圖片目前沒有顯示，ProtocolUnknownError
+# 保存成 pdf，目前因 CSS 樣式過於複雜，導致 pdfkit 無法正常處理
 def save_pdf(pdfFileName:str) -> None:
     options = {
         'page-size': 'A4',
@@ -177,6 +177,7 @@ def save_pdf(pdfFileName:str) -> None:
         'load-error-handling': 'skip',  # 資源加載處理方式
         'load-media-error-handling': 'ignore',  # 忽略多媒體錯誤
         'javascript-delay': 60 * 1000,  # 等待秒數
+        'enable-local-file-access': None,
     }
 
     pdfkit.from_file(file_path_html, pdfFileName, options=options)

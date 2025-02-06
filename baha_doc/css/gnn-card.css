@@ -1,0 +1,239 @@
+.article_gamercard {
+    display: block;
+    position: relative;
+    margin: 10px auto;
+    max-width: 480px;
+    border-radius: 4px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
+  }
+  .article_gamercard .gamecard__background {
+    position: relative;
+    border-radius: 4px 4px 0 0;
+    height: 110px;
+    overflow: hidden;
+  }
+  .article_gamercard .gamecard__background img {
+    position: absolute;
+    top: 50%;
+    margin: 0;
+    padding: 0;
+    transform: translateY(-50%);
+    width: 100%;
+    height: auto !important;
+  }
+  .article_gamercard .gamecard__background:after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.36);
+  }
+  .article_gamercard .gamecard__game {
+    position: absolute;
+    top: 44px;
+    padding: 0 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .article_gamercard .gamecard-img {
+    display: inline-block;
+    position: relative;
+    width: 56px;
+    height: 56px;
+    border-radius: 99em;
+    border: 1px solid rgba(229, 229, 229, 0.5);
+    background-color: #eee;
+    vertical-align: middle;
+    overflow: hidden;
+  }
+  .article_gamercard .gamecard-img img {
+    margin: 0;
+    padding: 0;
+    max-width: 100% !important;
+  }
+  .article_gamercard .gamecard-name {
+    display: inline-block;
+    max-width: calc(100% - 72px);
+    color: #fff;
+    vertical-align: middle;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+  }
+  .article_gamercard .gamecard-name .gamecard-label-name {
+    font-size: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .article_gamercard .gamecard-name .gamecard-label-name .tick {
+    font-style: normal;
+    color: #24e0ee;
+    font-size: 13px;
+    margin-left: 4px;
+  }
+  .article_gamercard .gamecard-name .gamecard-label-people {
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .article_gamercard .gamecard-name .gamecard-label-people span {
+    color: #FFEB3B;
+    font-weight: bold;
+  }
+  .article_gamercard .gamecard-name .gamecard-label-people a {
+    color: #fff;
+  }
+  .article_gamercard .gamecard-name .gamecard-label-people a img {
+    margin: -4px 2px 0 0;
+    width: 15px;
+  }
+  .article_gamercard .gamecard__info {
+    padding: 12px 16px;
+    min-height: 32px;
+  }
+  .article_gamercard .gamecard__gamer {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border-radius: 99em;
+    overflow: hidden;
+    vertical-align: middle;
+  }
+  .article_gamercard .gamecard__gamer img {
+    margin: 0 !important;
+    padding: 0;
+  }
+  .article_gamercard .gamecard__gamer.gamecard__gamer-more {
+    padding-top: 6px;
+    background: #e5e5e5;
+    font-size: 12px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  .article_gamercard a.gamecard__follow {
+    padding: 5px 16px 0;
+    border-radius: 4px;
+    height: 32px;
+    color: #fff !important;
+    font-size: 14px;
+    background: #009CAD !important;
+    float: right;
+    box-sizing: border-box;
+    text-decoration: none;
+  }
+  .article_gamercard a.gamecard__follow:hover {
+    background-color: #117e96;
+  }
+  .article_gamercard a.gamecard__follow.is-active, .article_gamercard a.gamecard__follow.is-active:hover {
+    font-size: 13px;
+    color: rgba(26, 26, 26, 0.5) !important;
+    background: #e5e5e5 !important;
+  }
+  
+  @media (max-width: 768px) {
+    .article_gamercard a.gamecard__follow:hover {
+      background-color: #009CAD;
+    }
+    .gamecard__info .item {
+      display: flex;
+      margin-bottom: 4px;
+      float: none;
+      font-size: 14px;
+    }
+    .gamecard__info .item a {
+      display: inline-block;
+      margin-right: 8px;
+      max-width: calc(100% - 80px);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .gamecard__info .item span {
+      display: inline-block;
+      font-size: 13px;
+    }
+  }
+  @media (max-width: 375px) {
+    .article_gamercard .gamecard__background {
+      height: 92px;
+    }
+    .article_gamercard .gamecard-img {
+      width: 48px;
+      height: 48px;
+    }
+    .article_gamercard .gamecard__game {
+      top: 36px;
+      padding: 0 8px;
+    }
+    .article_gamercard .gamecard__info {
+      padding: 12px 8px;
+    }
+    .article_gamercard .gamecard__follow {
+      padding: 5px 12px 0;
+    }
+  }
+  @media (max-width: 320px) {
+    .article_gamercard .gamecard__game {
+      top: 5px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .article_gamercard .gamecard-name {
+      width: 100%;
+    }
+    .article_gamercard .gamecard__follow {
+      margin-left: auto;
+    }
+  }
+  .c-section .article_gamercard {
+    margin: 16px auto 36px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .c-section .article_gamercard .gamecard__background {
+    height: 100px;
+  }
+  .c-section .article_gamercard .gamecard__background img {
+    left: 0;
+  }
+  .c-section .article_gamercard .gamecard__game {
+    text-align: left;
+    top: 32px;
+  }
+  .c-section .article_gamercard .gamecard-name {
+    margin-left: 8px;
+  }
+  .c-section .article_gamercard .gamecard-name .gamecard-label-name {
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1.8;
+  }
+  .c-section .article_gamercard a.gamecard__follow {
+    margin-top: 16px;
+    padding: 4px 16px;
+    line-height: 1.8;
+  }
+  .c-section .article_gamercard .gamecard__data {
+    text-align: left;
+  }
+  .c-section .article_gamercard .gamecard__info .item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+  .c-section .article_gamercard .gamecard__info .item a {
+    max-width: calc(100% - 80px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #464646;
+  }
+  
+  .article-content .article_gamercard a.gamecard__follow {
+    margin-top: 0;
+  }

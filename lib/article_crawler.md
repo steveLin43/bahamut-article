@@ -1,5 +1,6 @@
 # 下載巴哈姆特文章內容
-1. 需下載 wkhtmltopdf
+1. ~~需下載 wkhtmltopdf~~ 由於巴哈的 CSS 樣式過於複雜，導致 pdfkit 無法正常處理
+2. 暫時預設不產生 PDF 檔案，僅產生 html 檔案
 2. 執行指令範例：`python aritcle_crawler.py 討論版編號 文章編號 刪除html檔案 刪除PDF子文件 不下載圖片`
 3. 編號以後的參數不必按照順序
 
@@ -40,8 +41,3 @@
 69. <script async="async" src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
 70. <script>var googletag = googletag || {};googletag.cmd = googletag.cmd || [];</script>
 71. <script>if (window.Cookies) {...}...</script>
-
-
---enable-local-file-access
-
-article_title需要流程調整
