@@ -24,7 +24,7 @@ bsn:int = 0
 snA:int = 0
 delete_html:bool = False
 delete_pdf:bool = False
-no_picture:bool = False
+no_picture:bool = True
 
 def set_bsn():
     global bsn
@@ -52,7 +52,7 @@ def handle_not_necessary_para():
         if 'm' in sys.argv[3:]:
             delete_pdf = True
         if 'p' in sys.argv[3:]:
-            no_picture = True
+            no_picture = False
 
 # 處理每份文件名稱
 def set_file_name(title:str, page:int = 1) -> None:
@@ -61,8 +61,8 @@ def set_file_name(title:str, page:int = 1) -> None:
         file_path_html = os.path.join(dir_name, f'{title}.html')
         file_path_pdf = os.path.join(dir_name, f'{title}.pdf')
     else:
-        file_path_html = os.path.join(dir_name, f'{title} - 第{page}頁.html')
-        file_path_pdf = os.path.join(dir_name, f'{title} - 第{page}頁.pdf')
+        file_path_html = os.path.join(dir_name, f'{title}-第{page}頁.html')
+        file_path_pdf = os.path.join(dir_name, f'{title}-第{page}頁.pdf')
         file_path_pdf_final = os.path.join(dir_name, f'{title}.pdf')
 
 # 計算該篇文章最大樓層數
