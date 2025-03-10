@@ -261,3 +261,11 @@ def handle_morecomment(soup_content:BeautifulSoup) -> BeautifulSoup:
     
     replaced.replace_with(BeautifulSoup(new_content, 'html.parser'))
     return soup_content
+
+# 特定半形符號轉全形
+def half_to_full(trans_str:str) -> str:
+    halfwidth = "/\\*:?\"<>|"
+    fullwidth = "／＼＊：？＂＜＞｜"
+
+    translation_table = str.maketrans(halfwidth, fullwidth) # 映射表
+    return trans_str.translate(translation_table)

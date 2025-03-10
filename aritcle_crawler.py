@@ -120,7 +120,7 @@ def get_article_content() -> None:
             
             # 第一圈額外處理 head
             if (page_number == 1):
-                article_title = crawler_detail.get_baha_title(page_soup)
+                article_title = crawler_detail.half_to_full(crawler_detail.get_baha_title(page_soup))
                 str_list.append(crawler_detail.get_baha_head(page_soup))
 
             set_file_name(article_title, page_number)
