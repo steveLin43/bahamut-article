@@ -77,7 +77,7 @@ def get_last_floor() -> int:
 
     last_floor_text = floors[-1].text.strip()
     last_floor = ''.join(list(filter(str.isdigit,last_floor_text)))
-    return int(last_floor)
+    return int(last_floor or '0') or 1
 
 # 取得 url 頁面內容
 def get_request_content(page:int = 1) -> BeautifulSoup:

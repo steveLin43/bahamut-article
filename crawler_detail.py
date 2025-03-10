@@ -64,7 +64,10 @@ def get_content_by_page(soup:BeautifulSoup) -> str:
 
         # 中心內容
         content = baha_body.find_all('section', {'class': 'c-section'})
-        for item in content[1:-3]: # 第一個元素：頁碼；最後兩個元素：留言、延伸閱讀
+        for item in content:
+            if '<section class="c-section" id=' not in str(item): # 排除非內文的部分
+                continue
+
             hide_comments = item.find_all('a', {'class': 'hide-reply is-hide'})
             if hide_comments:
                 item = handle_morecomment(item)
