@@ -28,16 +28,16 @@ def set_parameters():
 
     bsn = common.set_para(sys.argv[1])
     sn = common.set_para(sys.argv[2])
-    handle_not_necessary_para()
+    handle_not_necessary_para(3)
 
-def handle_not_necessary_para():
+def handle_not_necessary_para(base_num:int):
     global delete_html, delete_pdf, no_picture
-    if (len(sys.argv) >= 4):
-        if 'd' in sys.argv[3:]:
+    if (len(sys.argv) >= base_num + 1):
+        if 'd' in sys.argv[base_num:]:
             delete_html = True
-        if 'm' in sys.argv[3:]:
+        if 'm' in sys.argv[base_num:]:
             delete_pdf = True
-        if 'p' in sys.argv[3:]:
+        if 'p' in sys.argv[base_num:]:
             no_picture = False
 
 # 取得 url 頁面內容
