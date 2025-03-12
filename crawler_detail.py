@@ -48,7 +48,7 @@ def get_baha_head(soup:BeautifulSoup) -> str:
         crawler_log.expected_log(42, 'get_baha_head 出錯。')
         raise
 
-# 抓湯裡面的各樓內容
+# 抓一般文章的各樓內容
 def get_content_by_page(soup:BeautifulSoup) -> str:
     result_list:list = ['<body>']
     try:
@@ -86,6 +86,56 @@ def get_content_by_page(soup:BeautifulSoup) -> str:
         result_list.append('</div></body>')
 
         return "\n".join(result_list)
+    except Exception:
+        crawler_log.expected_log(42, 'get_content_by_page 出錯。')
+        raise
+
+# 抓小屋創作的內容
+def get_content_by_house(soup:BeautifulSoup) -> str:
+    result_list:list = ['<body>']
+    try:
+        baha_body = soup.body
+
+        ## 有空時會再精細篩檢
+        '''
+        # 框架樣式
+        result_list.append(handle_content_bar(baha_body))
+        result_list.append(str(baha_body.find_all('script')[1]))
+        result_list.append(str(baha_body.find('div', {'class': 'BH-menu'})))
+        result_list.append('<div class="bh-banner" id="bh-banner"></div>')
+        result_list.append('<div class="" id="BH-wrapper"><div id="BH-master"><div class="forum-ad_top"></div>')
+        result_list.append('<!-- 框架樣式結束 -->')
+
+        # 中心內容
+        content = baha_body.find_all('section', {'class': 'c-section'})
+        for item in content:
+            if '<section class="c-section" id=' not in str(item): # 排除非內文的部分
+                continue
+
+            hide_comments = item.find_all('a', {'class': 'hide-reply is-hide'})
+            if hide_comments:
+                item = handle_morecomment(item)
+            #result_list.append(str(item))
+        content = baha_body.find_all('div', {'class': 'article-content main'})
+        for item in content:
+            crawler_log.expected_log(10,f'{item}')
+            result_list.append(str(item))
+            
+        result_list.append('</div>') # BH-master
+        result_list.append('<!-- 中心內容結束 -->')
+
+        # 右側內容
+        #result_list.append(handle_content_right(baha_body))
+        result_list.append('<!-- 右側內容結束 -->')
+
+        # 最底下 footer
+        #result_list.append(str(baha_body.find('br', {'class': 'clearfloat'})))
+
+        result_list.append('</div></body>')
+
+        return "\n".join(result_list)
+        '''
+        return str(baha_body)
     except Exception:
         crawler_log.expected_log(42, 'get_content_by_page 出錯。')
         raise
