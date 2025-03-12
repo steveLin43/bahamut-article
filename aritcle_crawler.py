@@ -70,7 +70,12 @@ def get_article_content() -> None:
     pdf_list:list = []
     total_floors_num = get_last_floor()
     article_title:str = ''
-    pages = (total_floors_num // floor_num_per_page) + 1 # 此文章共有幾頁
+    
+    # 此文章共有幾頁
+    pages = (total_floors_num // floor_num_per_page)
+    if total_floors_num % floor_num_per_page != 0:
+        pages += 1
+    
     page_number = 0
     page_number_each = 1 # 讓程式每幾頁儲存一次
     picture_number = 1
