@@ -235,6 +235,47 @@ def download_pictures_from_soup(soup:BeautifulSoup, path:str, pic_title:str, num
 
     return number
 
+# 抓取小屋中的所有圖片
+def download_pictures_by_house(soup:BeautifulSoup, path:str, pic_title:str, number:int) -> int:
+    pictures_list = soup.body.find_all('img', {'class': 'gallery-image'})
+    defective_nums = 0
+
+    # 提取連結並下載
+    for pic in pictures_list:
+        try:
+            pic_url = pic.get('src')
+
+            if not pic_url:
+                crawler_log.expected_log(43, f'{pic_url} 無效的圖片URL')
+                defective_nums += 1
+                continue
+
+            file_extension = pic_url.split('.')[-1].lower() # 統一轉為小寫
+            if file_extension not in ['jpg', 'jpeg', 'png', 'gif']:
+                crawler_log.expected_log(43, f'{pic_url}：不支持的圖片格式 {file_extension}')
+                defective_nums += 1
+                continue
+
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+            response = requests.get(pic_url, headers=headers, timeout=10)
+            response.raise_for_status() # 確保有正常取得圖片
+
+            pic_name = os.path.join(path, f'{pic_title}-{number:02}.{file_extension}')
+            with open(pic_name, "wb") as file:
+                file.write(response.content)
+
+            number += 1
+            time.sleep(1)
+
+        except Exception as e:
+            crawler_log.unexpected_error()
+            continue
+
+    if defective_nums != 0:
+        print('共有{defective_nums}張圖片沒有成功下載，請記得確認。')
+
+    return number
+
 # 取得更多內容的資料
 def get_morecomment_content(bsn:int, snB:int) -> str:
     ## morecomment html conent (固定變數)=======================================================
