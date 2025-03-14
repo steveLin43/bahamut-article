@@ -105,5 +105,5 @@ if __name__ == '__main__':
             common.create_dir()
             get_article_content()
         except Exception as e:
-            crawler_log.unexpected_error()
+            crawler_log.expected_log(0, 'Unknown')
             print('執行出錯導致失敗')

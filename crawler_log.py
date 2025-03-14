@@ -39,8 +39,9 @@ def expected_log(log_number:int = 0, addition_msg:str = ''):
     map_message = log_message_map.get(log_number, 'Unknown')
     message = f'{map_message} {addition_msg}'
     
-    if message == 'Unknown':
+    if addition_msg == 'Unknown':
         logging.error("Catch an unknown exception.", exc_info=True)
+        print('出現非預期錯誤。')
     elif log_number < 20:
         logging.debug(message)
     elif log_number < 30:
@@ -51,3 +52,6 @@ def expected_log(log_number:int = 0, addition_msg:str = ''):
         logging.error(message, exc_info=True)
     else:
         logging.critical(message, exc_info=True)
+
+    if log_number >= 20:
+        print(message)
