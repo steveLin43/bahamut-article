@@ -1,9 +1,16 @@
 # bahamut-article
+有些攻略網站的資訊可能會隨著網站關閉而消逝，為了避免這個狀況，因此創建這個下載專案。
+目前攻略網站以巴哈姆特為最大宗，因此會由此拓展。
+
 ## 目前功能
+### 巴哈姆特
 * [將指定的一般巴哈姆特文章下載成一個 PDF 檔(半完成品)](lib/article_crawler.md)
 * [將指定的"只看此樓"的文章下載成一個 HTML 檔(半完成品)](lib/spec_crawler.md)
 * [將指定的小屋文章下載成一個 HTML 檔(半完成品)](lib/house_crawler.md)
 * [將指定的精華文章下載成一個 HTML 檔(半完成品)](lib/star_crawler.md)
+
+### 其他網站
+* [奇樂奇樂(下載成一個 PDF 檔)](lib/kirokiro_crawler.md)
 
 ## 巴哈姆特文章分析
 1. 直接將頁面轉成 PDF 檔案時，時常因為頁面 CSS 的關係導致樓層跳躍與遮蓋

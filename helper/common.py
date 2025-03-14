@@ -93,7 +93,7 @@ def merge_pdf(pdf_list:list, output_name:str, delete_pdf:bool = False) -> None:
 # path:         檔案路徑
 # pic_title:    檔案標題
 # pic_tag:      html 的 element 名稱
-def download_pictures(pl:list, total_nums:int, path:str, pic_title:str, pic_tag:str) -> int:
+def download_pictures(pl:list, total_nums:int, path:str, pic_title:str, pic_tag:str, add_s:bool = False) -> int:
     defective_nums = 0
     for pic in pl:
         try:
@@ -103,6 +103,9 @@ def download_pictures(pl:list, total_nums:int, path:str, pic_title:str, pic_tag:
                 crawler_log.expected_log(43, f'{pic_url} 無效的圖片URL')
                 defective_nums += 1
                 continue
+            
+            if add_s:
+                pic_url = 'https:' + pic_url
 
             file_extension = pic_url.split('.')[-1].lower() # 統一轉為小寫
             if file_extension not in ['jpg', 'jpeg', 'png', 'gif']:
