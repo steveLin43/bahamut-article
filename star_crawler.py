@@ -70,7 +70,7 @@ def get_article_content() -> None:
         file_path_html, file_path_pdf, file_path_pdf_final = common.set_file_name(article_title, dir_name)
         str_list.append(crawler_detail.get_content_by_house(soup))
         if no_picture:
-            picture_number = crawler_detail.download_pictures_by_star(soup, dir_name, article_title, picture_number)
+            picture_number = crawler_detail.download_pictures_from_soup(soup, dir_name, article_title, picture_number, 3)
 
         # 寫入檔案
         result = "\n".join(str_list)

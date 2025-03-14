@@ -100,7 +100,7 @@ def get_article_content() -> None:
 
             str_list.append(crawler_detail.get_content_by_page(page_soup))
             if no_picture:
-                picture_number = crawler_detail.download_pictures_from_soup(page_soup, dir_name, article_title, picture_number)
+                picture_number = crawler_detail.download_pictures_from_soup(page_soup, dir_name, article_title, picture_number, 1)
 
             # 寫入檔案
             result = "\n".join(str_list)
