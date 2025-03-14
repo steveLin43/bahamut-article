@@ -345,10 +345,13 @@ def handle_morecomment(soup_content:BeautifulSoup) -> BeautifulSoup:
 
     # 產生替換內容
     new_content = '<div class="c-post__footer c-reply">'
-    div_tag = soup_content.find('div', {'class': 'c-reply__item'})
-    data_comment = div_tag['data-comment']
-    comment_data = json.loads(data_comment)
-    new_content += get_morecomment_content(comment_data['bsn'], comment_data['snB']) + '</div>'
+    
+    # 取出留言串標號
+    a_tag = soup_content.find('a', {'class': 'more-reply'})
+    data_comment = a_tag['onclick'].replace("extendComment(", "").replace(");", "")
+    comment_data = data_comment.split(",")
+    
+    new_content += get_morecomment_content(comment_data[0], comment_data[1]) + '</div>'
     
     replaced.replace_with(BeautifulSoup(new_content, 'html.parser'))
     return soup_content
