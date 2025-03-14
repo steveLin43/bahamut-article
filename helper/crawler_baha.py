@@ -1,6 +1,6 @@
-import crawler_log
+from . import common
+from . import crawler_log
 import json
-import os
 import requests
 import time
 from bs4 import BeautifulSoup
@@ -210,7 +210,7 @@ def download_pictures_from_soup(soup:BeautifulSoup, path:str, pic_title:str, num
         crawler_log.expected_log(40, f'download_pictures_from_soup 輸入的 article_type：{article_type}')
         return 0
 
-    return __download_pictures(pictures_list, number, path, pic_title, picture_tag)
+    return common.download_pictures(pictures_list, number, path, pic_title, picture_tag)
 
 # 取得更多內容的資料
 def get_morecomment_content(bsn:int, snB:int) -> str:
@@ -291,54 +291,3 @@ def handle_morecomment(soup_content:BeautifulSoup) -> BeautifulSoup:
     
     replaced.replace_with(BeautifulSoup(new_content, 'html.parser'))
     return soup_content
-
-# 特定半形符號轉全形
-def half_to_full(trans_str:str) -> str:
-    halfwidth = "/\\*:?\"<>|"
-    fullwidth = "／＼＊：？＂＜＞｜"
-
-    translation_table = str.maketrans(halfwidth, fullwidth) # 映射表
-    return trans_str.translate(translation_table)
-
-# 下載圖片
-# pl:           待下載的圖片列表
-# total_nums:   目前下載圖片數量(編號用)
-# path:         檔案路徑
-# pic_title:    檔案標題
-# pic_tag:      html 的 element 名稱
-def __download_pictures(pl:list, total_nums:int, path:str, pic_title:str, pic_tag:str) -> int:
-    defective_nums = 0
-    for pic in pl:
-        try:
-            pic_url = pic.get(pic_tag)
-
-            if not pic_url:
-                crawler_log.expected_log(43, f'{pic_url} 無效的圖片URL')
-                defective_nums += 1
-                continue
-
-            file_extension = pic_url.split('.')[-1].lower() # 統一轉為小寫
-            if file_extension not in ['jpg', 'jpeg', 'png', 'gif']:
-                crawler_log.expected_log(43, f'{pic_url}：不支持的圖片格式 {file_extension}')
-                defective_nums += 1
-                continue
-
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-            response = requests.get(pic_url, headers=headers, timeout = 10)
-            response.raise_for_status() # 確保有正常取得圖片
-
-            pic_name = os.path.join(path, f'{pic_title}-{total_nums:02}.{file_extension}')
-            with open(pic_name, "wb") as file:
-                file.write(response.content)
-
-            total_nums += 1
-            time.sleep(1)
-
-        except Exception as e:
-            crawler_log.unexpected_error()
-            continue
-
-    if defective_nums != 0:
-        print('共有{defective_nums}張圖片沒有成功下載，請記得確認。')
-
-    return total_nums

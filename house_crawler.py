@@ -1,6 +1,6 @@
-import common
-import crawler_detail
-import crawler_log
+import helper.common as common
+import helper.crawler_baha as crawler_baha
+import helper.crawler_log as crawler_log
 import os
 import requests
 import sys
@@ -60,14 +60,14 @@ def get_article_content() -> None:
             return
 
         # 處理 head
-        article_title = crawler_detail.half_to_full(crawler_detail.get_baha_title(soup))
+        article_title = common.half_to_full(crawler_baha.get_baha_title(soup))
         str_list.append(str(soup.head)) ##??? 有空時會再精細篩檢
 
         # 設定此次檔名
         file_path_html, file_path_pdf, file_path_pdf_final = common.set_file_name(article_title, dir_name)
-        str_list.append(crawler_detail.get_content_by_house(soup))
+        str_list.append(crawler_baha.get_content_by_house(soup))
         if no_picture:
-            picture_number = crawler_detail.download_pictures_from_soup(soup, dir_name, article_title, picture_number, 2)
+            picture_number = crawler_baha.download_pictures_from_soup(soup, dir_name, article_title, picture_number, 2)
 
         # 寫入檔案
         result = "\n".join(str_list)

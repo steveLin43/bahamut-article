@@ -4,7 +4,8 @@ from datetime import datetime
 
 now = datetime.now()
 date = now.strftime('%Y-%m-%d')
-dir_name:str = os.path.join(os.path.dirname(__file__), 'log')
+target_dir = os.path.dirname(os.path.dirname(__file__)) # 上一層資料夾
+dir_name:str = os.path.join(target_dir, 'log')
 log_name = os.path.join(dir_name, f'{date}.log')
 
 if not os.path.exists(dir_name):

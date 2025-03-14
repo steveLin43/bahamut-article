@@ -2,7 +2,7 @@
 /gen/*
 
 # cache
-/__pycache__/*
+helper/__pycache__/*
 
 #log
 /log/*
