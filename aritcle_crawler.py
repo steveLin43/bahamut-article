@@ -112,20 +112,20 @@ def get_article_content() -> None:
             
             # 分頁儲存避免檔案過大導致失敗
             if (page_number % page_number_each) == 0:
-                #common.save_pdf(file_path_html, file_path_pdf)# 目前因 CSS 樣式過於複雜，導致 pdfkit 無法正常處理
+                #common.pdf_saved(file_path_html, file_path_pdf)# 目前因 CSS 樣式過於複雜，導致 pdfkit 無法正常處理
                 pdf_list.append(file_path_pdf)
                 if delete_html:
                     os.remove(file_path_html)
 
         if (pages % page_number_each) != 0 :
-            #common.save_pdf(file_path_html, file_path_pdf) # 目前因 CSS 樣式過於複雜，導致 pdfkit 無法正常處理
+            #common.pdf_saved(file_path_html, file_path_pdf) # 目前因 CSS 樣式過於複雜，導致 pdfkit 無法正常處理
             pdf_list.append(file_path_pdf)
             if delete_html:
                 os.remove(file_path_html)
         str_list.clear()
 
         #if len(file_path_pdf) > 1:
-            #common.merge_pdf(pdf_list, file_path_pdf_final, delete_pdf)
+            #common.pdf_merged(pdf_list, file_path_pdf_final, delete_pdf)
 
     except Exception as e:
         crawler_log.expected_log(41, f'第{page_number}頁。')

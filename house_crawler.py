@@ -77,7 +77,7 @@ def get_article_content() -> None:
             file.write(result)
         str_list = str_list[:1]
             
-        #common.save_pdf(file_path_html, file_path_pdf)# 目前因 CSS 樣式過於複雜，導致 pdfkit 無法正常處理
+        #common.pdf_saved(file_path_html, file_path_pdf)# 目前因 CSS 樣式過於複雜，導致 pdfkit 無法正常處理
         pdf_list.append(file_path_pdf)
         if delete_html:
             os.remove(file_path_html)

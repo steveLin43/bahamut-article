@@ -30,7 +30,7 @@ def half_to_full(trans_str:str) -> str:
     translation_table = str.maketrans(halfwidth, fullwidth) # 映射表
     return trans_str.translate(translation_table)
 
-# 處理每份文件名稱
+# 設置每份文件名稱
 def set_file_name(title:str, dir_name:str = '', page:int = 1, total_pages:int = 1) -> None:
     file_path_pdf_final = ''
     if(total_pages == 1):
@@ -43,7 +43,7 @@ def set_file_name(title:str, dir_name:str = '', page:int = 1, total_pages:int = 
     return file_path_html, file_path_pdf, file_path_pdf_final
 
 # 保存成 pdf
-def save_pdf(file_path:str, pdfFileName:str) -> None:
+def pdf_saved(file_path:str, pdfFileName:str) -> None:
     options = {
         'page-size': 'A4',
         'margin-top': '0.2in',
@@ -68,7 +68,8 @@ def save_pdf(file_path:str, pdfFileName:str) -> None:
 
     pdfkit.from_file(file_path, pdfFileName, options=options)
 
-def merge_pdf(pdf_list:list, output_name:str, delete_pdf:bool = False) -> None:
+# 將前者產生的 PDF 合成為一個 PDF 檔案
+def pdf_merged(pdf_list:list, output_name:str, delete_pdf:bool = False) -> None:
     pagenum = 0
     pdf_output = PdfWriter()
 
