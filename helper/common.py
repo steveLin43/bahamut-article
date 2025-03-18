@@ -88,6 +88,30 @@ def pdf_merged(pdf_list:list, output_name:str, delete_pdf:bool = False) -> None:
         for item in pdf_list:
             os.remove(item)
 
+# 將多個 PDF 檔名轉換成標題名稱，目前:去除前置文字、去除前後空白
+# target:   PDF 檔陣列
+# pre_str:  共同的前置文字，例如 XXX1.pdf、XXX2.pdf
+def pdf_titles_filter(target:list, pre_str:str = '') -> list:
+    if pre_str != '':
+        target = [t.replace(pre_str, '') for t in target]
+    target = [t.replace('.pdf', '') for t in target]
+    target = [t.strip() for t in target]
+    return target
+
+# 插入新的 PDF 進行合併
+# title:    標題
+# writer:   共用的 PdfWriter instance
+# file_path:新增的檔案路徑
+# now_page: 插入書籤的頁數
+# 輸出:(共用的 PdfWriter instance, 這次新增的頁數)
+def pdf_add_pdf(title:str, writer:PdfWriter, file_path:str, now_page:int = 0) -> tuple:
+    #writer = pdf_add_chapter_title(title, writer)
+    file = PdfReader(file_path)
+    for page in file.pages:
+        writer.add_page(page)
+    writer.add_outline_item(title = title, page_number = now_page) # 加入書籤
+    return writer, len(file.pages)
+
 # 下載圖片
 # pl:           待下載的圖片列表
 # total_nums:   目前下載圖片數量(編號用)
